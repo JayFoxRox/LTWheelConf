@@ -1,20 +1,25 @@
 OBJS=main.o wheelfunctions.o wheels.o
-LIBS=usb-1.0
+LIBS=-lusb
+
+CC=clang
+
+CFLAGS=-m32 -Wall -g -O0
+
 
 all: ltwheelconf
 
 ltwheelconf: $(OBJS)
-	gcc -Wall -l$(LIBS) -g3 -o ltwheelconf $(OBJS)
+	$(CC) $(CFLAGS) $(LIBS) -o ltwheelconf $(OBJS)
 
 main.o: main.c
-	gcc -Wall -c main.c
+	$(CC) $(CFLAGS) -c main.c
 
 wheels.o: wheels.c wheels.h
-	gcc -Wall -c wheels.c
+	$(CC) $(CFLAGS) -c wheels.c
 
 
 wheelfunctions.o: wheelfunctions.c wheelfunctions.h wheels.h
-	gcc -Wall -c wheelfunctions.c
+	$(CC) $(CFLAGS) -c wheelfunctions.c
 
 clean:
 	rm -rf ltwheelconf $(OBJS)

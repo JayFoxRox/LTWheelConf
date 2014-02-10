@@ -194,9 +194,9 @@ int main (int argc, char **argv)
 
     if (argc > 1)
     {
-        libusb_init(NULL);
+        usb_init();
         if (verbose_flag > 1)
-            libusb_set_debug(0, 3);
+            usb_set_debug(3);
 
         int wait_for_udev = 0;
         wheelstruct* wheel = 0;
@@ -283,7 +283,7 @@ int main (int argc, char **argv)
                 }
             }
         }
-        libusb_exit(NULL);
+//        libusb_exit(NULL); < Not provided by libusb-0.1
     } else {
         // display usage information if no arguments given
         help();

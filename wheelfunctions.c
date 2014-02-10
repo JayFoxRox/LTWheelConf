@@ -39,13 +39,37 @@ void print_cmd(char *result, unsigned char cmd[8]) {
     sprintf(result, "%02X %02X %02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6], cmd[7]);
 }
 
+usb_dev_handle * usb_open_device_with_vid_pid(void* context, unsigned short vid, unsigned short pid) {
+
+	usb_find_busses();
+	usb_find_devices();
+
+	struct usb_bus *busses;
+	busses = usb_get_busses();
+
+  struct usb_bus *bus;
+	for (bus = busses; bus; bus = bus->next) {
+		struct usb_device *dev;
+
+		for (dev = bus->devices; dev; dev = dev->next) {
+			/* Check if this device is a printer */
+			if ((dev->descriptor.idVendor == vid) && (dev->descriptor.idProduct == pid)) {
+				/* Open the device, claim the interface and do your processing */
+        return usb_open(dev);
+			}
+
+		}
+	}
+
+  return NULL;
+}
 
 void list_devices() {
-    libusb_device_handle *handle = 0;
-    libusb_device *dev = 0;
-    struct libusb_device_descriptor desc;
+    usb_dev_handle *handle = 0;
+    struct usb_device *dev = 0;
+    struct usb_device_descriptor desc;
     memset(&desc, 0, sizeof(desc));
-    unsigned char descString[255];
+    char descString[255];
     memset(&descString, 0, sizeof(descString));
     int numWheels = sizeof(wheels)/sizeof(wheelstruct);
 
@@ -55,41 +79,40 @@ void list_devices() {
     for (i = 0; i < numWheels; i++) {
         w = wheels[i];
         printf("Scanning for \"%s\": ", w.name);
-        handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w.native_pid);
+        handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w.native_pid);
         if (handle != 0) {
-            dev = libusb_get_device(handle);
+            dev = usb_device(handle);
             if (dev != 0) {
-                int ret = libusb_get_device_descriptor(dev, &desc);
+                int ret = usb_get_string_simple(handle, desc.iProduct, descString, 255);
                 if (ret == 0) {
                     numFound++;
-                    libusb_get_string_descriptor_ascii(handle, desc.iProduct, descString, 255);
                     printf("\t\tFound \"%s\", release number %x, %04x:%04x (bus %d, device %d)",
                            descString, desc.bcdDevice, desc.idVendor, desc.idProduct,
-                           libusb_get_bus_number(dev), libusb_get_device_address(dev));
+                           dev->bus->location, dev->devnum);
                 } else {
                     perror("Get device descriptor");
                 }
             } else {
                 perror ("Get device");
             }
-            libusb_close(handle);
+            usb_close(handle);
         }
         printf("\n");
     }
     printf("Found %d devices.\n", numFound);
 }
 
-int send_command(libusb_device_handle *handle, cmdstruct command ) {
+int send_command(usb_dev_handle *handle, cmdstruct command ) {
     if (command.numCmds == 0) {
         printf( "send_command: Empty command provided! Not sending anything...\n");
         return 0;
     }
 
     int stat;
-    stat = libusb_detach_kernel_driver(handle, 0);
+    stat = usb_detach_kernel_driver_np(handle, 0);
     if ((stat < 0 ) || verbose_flag) perror("Detach kernel driver");
 
-    stat = libusb_claim_interface( handle, 0 );
+    stat = usb_claim_interface( handle, 0 );
     if ( (stat < 0) || verbose_flag) perror("Claiming USB interface");
 
     int transferred = 0;
@@ -102,7 +125,8 @@ int send_command(libusb_device_handle *handle, cmdstruct command ) {
             print_cmd(raw_string, command.cmds[cmdCount]);
             printf("\tSending string:   \"%s\"\n", raw_string);
         }
-        stat = libusb_interrupt_transfer( handle, 1, command.cmds[cmdCount], sizeof( command.cmds[cmdCount] ), &transferred, TRANSFER_WAIT_TIMEOUT_MS );
+        stat = usb_interrupt_write( handle, 1, (const char*)command.cmds[cmdCount], sizeof( command.cmds[cmdCount] ), TRANSFER_WAIT_TIMEOUT_MS );
+        transferred = (stat>0)?stat:0;
         if ( (stat < 0) || verbose_flag) perror("Sending USB command");
     }
 
@@ -113,19 +137,23 @@ int send_command(libusb_device_handle *handle, cmdstruct command ) {
      * I am not sure if this produces a memory leak within libusb, but i do not think there is another
      * solution possible...
      */
-    stat = libusb_release_interface(handle, 0 );
-    if (stat != LIBUSB_ERROR_NO_DEVICE) { // silently ignore "No such device" error due to reasons explained above.
+    stat = usb_release_interface(handle, 0 );
+/*FIXME:
+    if (stat != usb_ERROR_NO_DEVICE) { // silently ignore "No such device" error due to reasons explained above.
         if ( (stat < 0) || verbose_flag) {
             perror("Releasing USB interface.");
         }
     }
+*/
 
-    stat = libusb_attach_kernel_driver( handle, 0);
-    if (stat != LIBUSB_ERROR_NO_DEVICE) { // silently ignore "No such device" error due to reasons explained above.
+//FIXME: Not portable?!    stat = usb_attach_kernel_driver_np( handle, 0);
+/*FIXME:
+    if (stat != usb_ERROR_NO_DEVICE) { // silently ignore "No such device" error due to reasons explained above.
         if ( (stat < 0) || verbose_flag) {
             perror("Reattaching kernel driver");
         }
     }
+*/
     return 0;
 }
 
@@ -138,14 +166,14 @@ int set_native_mode(wheelstruct* w)
     }
 
     // check if wheel is already in native mode
-    libusb_device_handle *handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid);
+    usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid);
     if ( handle != NULL ) {
         printf( "Found a %s already in native mode.\n", w->name);
         return 0;
     }
 
     // try to get handle to device in restricted mode
-    handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->restricted_pid );
+    handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->restricted_pid );
     if ( handle == NULL ) {
         printf( "Can not find %s in restricted mode (PID %x). This should not happen :-(\n", w->name, w->restricted_pid);
         return -1;
@@ -166,7 +194,7 @@ int set_native_mode(wheelstruct* w)
     sleep(CONFIGURE_WAIT_SEC);
 
     // If above command was successfully we should now find the wheel in extended mode
-    handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid);
+    handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid);
     if ( handle != NULL ) {
         printf ( "%s is now set to native mode.\n", w->name);
     } else {
@@ -195,7 +223,7 @@ short unsigned int clamprange(wheelstruct* w, short unsigned int range)
 
 int set_range(wheelstruct* w, short unsigned int range)
 {
-    libusb_device_handle *handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
+    usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
     if ( handle == NULL ) {
         printf ( "%s not found. Make sure it is set to native mode (use --native).\n", w->name);
         return -1;
@@ -219,7 +247,7 @@ int set_range(wheelstruct* w, short unsigned int range)
 
 int set_autocenter(wheelstruct* w, int centerforce, int rampspeed)
 {
-    libusb_device_handle *handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
+    usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
     if ( handle == NULL ) {
         printf ( "%s not found. Make sure it is set to native mode (use --native).\n", w->name);
         return -1;
@@ -300,11 +328,11 @@ int set_gain(int gain, char *device_file_name, int wait_for_udev) {
 
 int reset_wheel(wheelstruct* w)
 {
-    libusb_device_handle *handle = libusb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
+    usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
     if ( handle == NULL ) {
         printf ( "%s not found. Make sure it is set to native mode (use --native).\n", w->name);
         return -1;
     }
-    return libusb_reset_device(handle);
+    return usb_reset(handle);
 }
 

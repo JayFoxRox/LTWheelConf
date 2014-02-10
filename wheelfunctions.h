@@ -21,7 +21,7 @@
 #ifndef wheelfunctions_h
 #define wheelfunctions_h
 
-#include <libusb-1.0/libusb.h>
+#include <usb.h>
 
 
 /*
@@ -58,7 +58,7 @@ void list_devices();
 /*
  * Send custom command to USB device using interrupt transfer
  */
-int send_command(libusb_device_handle *handle, cmdstruct command );
+int send_command(usb_dev_handle *handle, cmdstruct command );
 
 /*
  * Logitech wheels are in a kind of restricted mode when initially connected via usb.
