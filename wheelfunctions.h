@@ -37,18 +37,18 @@
  *
  * Rampspeed seems to be limited to 0-7 only.
  */
-int set_autocenter(wheelstruct* w, int centerforce, int rampspeed);
+int set_autocenter(const wheelstruct* w, int centerforce, int rampspeed);
 
 /*
  * Set maximum rotation range of wheel in degrees
  * G25/G27/DFP support up to 900 degrees.
  */
-int set_range(wheelstruct* w, unsigned short int range);
+int set_range(const wheelstruct* w, unsigned short int range);
 
 /*
  * Clamp range value to be in allowed range for specified wheel
  */
-unsigned short int clamprange(wheelstruct* w, unsigned short int range);
+unsigned short int clamprange(const wheelstruct* w, unsigned short int range);
 
 /*
  * Search and list all known/supported wheels
@@ -74,7 +74,7 @@ int send_command(usb_dev_handle *handle, cmdstruct command );
  * This function takes care to switch the wheel to "native" mode with no restrictions.
  *
  */
-int set_native_mode(wheelstruct* w);
+int set_native_mode(const wheelstruct* w);
 
 /*
  * Generic method to set autocenter force of any wheel device recognized by kernel
@@ -93,6 +93,6 @@ int set_gain(int gain, char *device_file_name, int wait_for_udev);
 /*
  * Reset the wheel, similar like unplug-replug cycle
  */
-int reset_wheel(wheelstruct* w);
+int reset_wheel(const wheelstruct* w);
 
 #endif

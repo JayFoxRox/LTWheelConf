@@ -157,7 +157,7 @@ int send_command(usb_dev_handle *handle, cmdstruct command ) {
     return 0;
 }
 
-int set_native_mode(wheelstruct* w)
+int set_native_mode(const wheelstruct* w)
 {
     // first check if wheel has restriced/native mode at all
     if (w->native_pid == w->restricted_pid) {
@@ -207,7 +207,7 @@ int set_native_mode(wheelstruct* w)
 }
 
 
-short unsigned int clamprange(wheelstruct* w, short unsigned int range)
+short unsigned int clamprange(const wheelstruct* w, short unsigned int range)
 {
     if (range < w->min_rotation) {
         printf("Minimum range for %s is %d degrees.\n", w->name, w->min_rotation);
@@ -221,7 +221,7 @@ short unsigned int clamprange(wheelstruct* w, short unsigned int range)
 }
 
 
-int set_range(wheelstruct* w, short unsigned int range)
+int set_range(const wheelstruct* w, short unsigned int range)
 {
     usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
     if ( handle == NULL ) {
@@ -245,7 +245,7 @@ int set_range(wheelstruct* w, short unsigned int range)
 }
 
 
-int set_autocenter(wheelstruct* w, int centerforce, int rampspeed)
+int set_autocenter(const wheelstruct* w, int centerforce, int rampspeed)
 {
     usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
     if ( handle == NULL ) {
@@ -326,7 +326,7 @@ int set_gain(int gain, char *device_file_name, int wait_for_udev) {
     return 0;
 }
 
-int reset_wheel(wheelstruct* w)
+int reset_wheel(const wheelstruct* w)
 {
     usb_dev_handle *handle = usb_open_device_with_vid_pid(NULL, VID_LOGITECH, w->native_pid );
     if ( handle == NULL ) {

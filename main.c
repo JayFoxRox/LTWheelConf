@@ -199,7 +199,7 @@ int main (int argc, char **argv)
             usb_set_debug(3);
 
         int wait_for_udev = 0;
-        wheelstruct* wheel = 0;
+        const wheelstruct* wheel = NULL;
 
         if (do_help) {
             help();
