@@ -19,7 +19,7 @@
  */
 
 
-#define VERSION "0.2.7"
+#define VERSION "0.2.7-fox"
 
 #include <getopt.h>
 #include <stdio.h>

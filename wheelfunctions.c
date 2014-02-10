@@ -35,8 +35,8 @@
 /* Globals */
 extern int verbose_flag;
 
-void print_cmd(char *result, unsigned char cmd[8]) {
-    sprintf(result, "%02X %02X %02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6], cmd[7]);
+void print_cmd(char *result, unsigned char cmd[7]) {
+    sprintf(result, "%02X %02X %02X %02X %02X %02X %02X", cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], cmd[6]);
 }
 
 usb_dev_handle * usb_open_device_with_vid_pid(void* context, unsigned short vid, unsigned short pid) {
