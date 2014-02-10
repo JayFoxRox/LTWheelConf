@@ -1,9 +1,9 @@
 OBJS=main.o wheelfunctions.o wheels.o
-LIBS=-lusb
+LIBS=`pkg-config --libs libusb`
 
 CC=clang
 
-CFLAGS=-m32 -Wall -g -O0
+CFLAGS=-m32 -Wall -g -O0 `pkg-config --cflags libusb`
 
 
 all: ltwheelconf
