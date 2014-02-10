@@ -25,8 +25,8 @@
 #define VID_LOGITECH 0x046d
 
 typedef struct {
-    // reserve space for max. 4 command strings, 8 chars each
-    unsigned char cmds[4][8];
+    // reserve space for max. 4 command strings, 7 chars each
+    unsigned char cmds[4][7];
     // how many command strings are actually used
     unsigned int numCmds;
 } cmdstruct;

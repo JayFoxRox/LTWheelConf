@@ -10,7 +10,6 @@ int get_nativemode_cmd_DFP(cmdstruct *c)
     c->cmds[0][4] = 0x00;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
     c->numCmds = 1;
     return 0;
 }
@@ -24,7 +23,6 @@ int get_nativemode_cmd_DFGT(cmdstruct *c)
     c->cmds[0][4] = 0x00;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
 
     c->cmds[1][0] = 0xf8;
     c->cmds[1][1] = 0x09;
@@ -33,7 +31,6 @@ int get_nativemode_cmd_DFGT(cmdstruct *c)
     c->cmds[1][4] = 0x00;
     c->cmds[1][5] = 0x00;
     c->cmds[1][6] = 0x00;
-    c->cmds[1][7] = 0x00;
 
     c->numCmds = 2;
     return 0;
@@ -48,7 +45,6 @@ int get_nativemode_cmd_G25(cmdstruct *c)
     c->cmds[0][4] = 0x00;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
     c->numCmds = 1;
     return 0;
 }
@@ -62,7 +58,6 @@ int get_nativemode_cmd_G27(cmdstruct *c)
     c->cmds[0][4] = 0x00;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
 
     c->cmds[1][0] = 0xf8;
     c->cmds[1][1] = 0x09;
@@ -71,7 +66,6 @@ int get_nativemode_cmd_G27(cmdstruct *c)
     c->cmds[1][4] = 0x00;
     c->cmds[1][5] = 0x00;
     c->cmds[1][6] = 0x00;
-    c->cmds[1][7] = 0x00;
 
     c->numCmds = 2;
     return 0;
@@ -87,7 +81,6 @@ int get_range_cmd(cmdstruct *c, int range)
     c->cmds[0][4] = 0x00;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
     c->numCmds = 1;
     return 0;
 }
@@ -109,7 +102,6 @@ int get_range_cmd2(cmdstruct *c, int range)
     c->cmds[0][4] = 0x00;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
 
     /* Prepare command B */
     c->cmds[1][0] = 0x81;
@@ -119,7 +111,6 @@ int get_range_cmd2(cmdstruct *c, int range)
     c->cmds[1][4] = 0x00;
     c->cmds[1][5] = 0x00;
     c->cmds[1][6] = 0x00;
-    c->cmds[1][7] = 0x00;
 
     c->numCmds = 2;
 
@@ -164,7 +155,6 @@ int get_autocenter_cmd(cmdstruct *c, int centerforce, int rampspeed)
     c->cmds[0][4] = centerforce & 0xff;
     c->cmds[0][5] = 0x00;
     c->cmds[0][6] = 0x00;
-    c->cmds[0][7] = 0x00;
 
     c->numCmds = 1;
     return 0;
